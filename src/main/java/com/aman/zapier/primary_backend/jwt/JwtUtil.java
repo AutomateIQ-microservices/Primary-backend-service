@@ -33,9 +33,13 @@ public class JwtUtil {
 				.compact();
 	}
 	
+//	private Key key() {
+//		return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
+//	}
 	private Key key() {
-		return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));
+	    return Keys.hmacShaKeyFor(Decoders.BASE64.decode(jwtSecret));  // jwtSecret is your base64-encoded secret
 	}
+
 	
 	//extract all claims from jwt
 	public Claims extractAllClaims(String token) {
