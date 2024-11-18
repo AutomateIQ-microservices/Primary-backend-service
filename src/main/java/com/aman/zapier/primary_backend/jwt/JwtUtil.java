@@ -43,15 +43,37 @@ public class JwtUtil {
 	
 	//extract all claims from jwt
 	public Claims extractAllClaims(String token) {
-		return Jwts.parser()
-				.verifyWith((SecretKey) key())
-				.build().parseSignedClaims(token)
-				.getPayload();
+		try {
+			Claims claims=Jwts.parser()
+					.verifyWith((SecretKey) key())
+					.build().parseSignedClaims(token)
+					.getPayload();
+			return claims;
+		}
+		catch(Exception e) {
+			logger.error("Error parsing token: {}", e.getMessage());
+	        throw e;
+		}
+
 	}
 	
 	//extract userId from the claims
 	public Long getUserId(String token) {
-		return (Long) extractAllClaims(token).get("userId");
+		Object userId = extractAllClaims(token).get("userId");
+		
+		if (userId != null) {
+	        logger.debug("Extracted userId: {} (type: {})", userId, userId.getClass());
+	    } else {
+	        logger.error("userId claim is missing in the token");
+	    }
+		
+	    if (userId instanceof Integer) {
+	        return ((Integer) userId).longValue(); // Convert Integer to Long
+	    } else if (userId instanceof Long) {
+	        return (Long) userId;
+	    } else {
+	        throw new RuntimeException("Invalid userId type in JWT token");
+	    }
 	}
 	//extract subject (username)
 	public String getSubject(String token) {

@@ -57,7 +57,7 @@ public class UserService {
 	
 	//return user email and name based on id
 	public User returnUser(HttpServletRequest request) {
-		Integer userId=(Integer)request.getAttribute("id");
+		Long userId=(Long)request.getAttribute("id");
 		User user=userRepo.findById(userId).orElseThrow(()->new RuntimeException("user not found"));
 		
 		return user;

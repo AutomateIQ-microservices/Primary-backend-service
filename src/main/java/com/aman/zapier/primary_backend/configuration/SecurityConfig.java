@@ -15,54 +15,45 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import com.aman.zapier.primary_backend.jwt.AuthEntryPoint;
 import com.aman.zapier.primary_backend.jwt.AuthTokenFilter;
 
-import static org.springframework.security.config.Customizer.withDefaults;
-
 import org.springframework.beans.factory.annotation.Autowired;
 
-
-@Configuration //tells the spring application that this class provides configuration
-@EnableWebSecurity //enable this web security class in the application
+@Configuration
+@EnableWebSecurity
 public class SecurityConfig {
-	
-	@Autowired
-	private AuthTokenFilter authTokenFilter;
-	
-	@Autowired 
-	private AuthEntryPoint authEntryPoint;
-	
-	//to use in service
-	@Bean
-	public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
-	   return authConfig.getAuthenticationManager();
-	}
-	
-	@Bean
-	SecurityFilterChain mySecurityFilterChain(HttpSecurity http) throws Exception{
-		
-		http
-			.csrf(csrf->csrf.disable())
-			
-			// Handle unauthorized exceptions
-            .exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPoint))
-            
-            // Stateless session management Configured as SessionCreationPolicy.STATELESS to ensure no session is created or used by Spring Security.
-            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-            
-            .authorizeHttpRequests(authorizeRequests ->
-            			authorizeRequests.requestMatchers("/api/v1/users/signup").permitAll()
-            			.requestMatchers("/api/v1/users/signin").permitAll()
-            			.anyRequest().authenticated())
-            
-            .addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class);
 
-		
-		return http.build();
-	}
-	
-	
-	@Bean
-	public PasswordEncoder passwordEncoder() {
-		return new BCryptPasswordEncoder();
-	}
-	
+    @Autowired
+    private AuthEntryPoint authEntryPoint;
+
+    @Autowired
+    private AuthTokenFilter authTokenFilter;
+
+    // Bean for AuthenticationManager
+    @Bean
+    public AuthenticationManager authenticationManager(AuthenticationConfiguration authConfig) throws Exception {
+        return authConfig.getAuthenticationManager();
+    }
+
+    // Define the SecurityFilterChain with necessary configurations
+    @Bean
+    public SecurityFilterChain mySecurityFilterChain(HttpSecurity http) throws Exception {
+
+        http.csrf(csrf -> csrf.disable())
+            .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+            .authorizeHttpRequests(authorizeRequests ->
+                authorizeRequests.requestMatchers("/api/v1/users/signup").permitAll()
+                    .requestMatchers("/api/v1/users/signin").permitAll()
+                    .requestMatchers("/error").permitAll()
+                    .anyRequest().authenticated())
+            .addFilterBefore(authTokenFilter, UsernamePasswordAuthenticationFilter.class)  // Add AuthTokenFilter before UsernamePasswordAuthenticationFilter
+            .headers(headers -> headers.frameOptions(frameOptions -> frameOptions.sameOrigin()))
+            .exceptionHandling(exception -> exception.authenticationEntryPoint(authEntryPoint));
+
+        return http.build();
+    }
+
+    // Password Encoder Bean
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return new BCryptPasswordEncoder();
+    }
 }

@@ -27,7 +27,8 @@ public class AuthEntryPoint implements AuthenticationEntryPoint{
 	throws IOException, ServletException 
 	{
 		// TODO Auto-generated method stub
-		logger.error("Unauthorized error: {}", authException.getMessage());
+		//logger.error("Unauthorized error: {}", authException.getMessage());
+		logger.error("Unauthorized access to path: {} | Error: {}", request.getServletPath(), authException.getMessage());
 		
 		response.setContentType(MediaType.APPLICATION_JSON_VALUE);
 		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
