@@ -6,6 +6,8 @@ import java.util.Map;
 import java.util.UUID;
 
 import org.apache.hc.core5.http.HttpStatus;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
@@ -29,6 +31,9 @@ import com.aman.zapier.primary_backend.entities.AvailableTriggers;
 import com.aman.zapier.primary_backend.entities.Trigger;
 import com.aman.zapier.primary_backend.entities.User;
 import com.aman.zapier.primary_backend.entities.Zap;
+import com.aman.zapier.primary_backend.jwt.AuthTokenFilter;
+import com.aman.zapier.primary_backend.objects.AvailableActionObject;
+import com.aman.zapier.primary_backend.objects.AvailableTriggerObject;
 import com.aman.zapier.primary_backend.objects.ZapObject;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -40,6 +45,7 @@ import jakarta.servlet.http.HttpServletRequest;
 @CrossOrigin(origins="*")
 public class ZapController {
 
+	private static final Logger logger = LoggerFactory.getLogger(ZapController.class);
 	@Autowired
 	private TriggerRepository triggerRepo;
 	
@@ -161,20 +167,28 @@ public class ZapController {
 
 		        // Setting the trigger name from the associated Trigger
 		        Trigger zapTrigger = currentZap.getTrig();
-		        currentZapObject.setTriggerName(zapTrigger != null ? zapTrigger.getTriggerName() : "No Trigger");
+		        //currentZapObject.setTriggerName(zapTrigger != null ? zapTrigger.getTriggerName() : "No Trigger");
+		        if(zapTrigger!=null) {
+		        	AvailableTriggerObject trigObject=new AvailableTriggerObject();
+		        	trigObject.setId(zapTrigger.getId());
+		        	trigObject.setName(zapTrigger.getTriggerName());
+		        	currentZapObject.setTriggerName(trigObject);
+		        }
 
 		        // Setting the action names by iterating over associated actions
 		        List<Action> zapActions = currentZap.getActions();
-		        List<String> actionNames = new ArrayList<>();
+		        List<AvailableActionObject> actionNames = new ArrayList<>();
 		        for (Action action : zapActions) {
-		            actionNames.add(action.getActionName()); // Assuming Action has a `getName` method
+		        	AvailableActionObject actObj=new AvailableActionObject();
+		        	actObj.setId(action.getId());
+		        	actObj.setName(action.getActionName());
+		            actionNames.add(actObj); // Assuming Action has a `getName` method
 		        }
 		        currentZapObject.setActionNames(actionNames);
 
 		        // Adding the ZapObject to the return list
 		        returnObject.add(currentZapObject);
 		}
-		
 		return ResponseEntity.status(HttpStatus.SC_OK).body(returnObject);
 		
 	}
@@ -191,15 +205,22 @@ public class ZapController {
 		Trigger currentTrigger=currentZap.getTrig();
 		
 		ZapObject responseObject=new ZapObject();
-		responseObject.setTriggerName(currentTrigger.getTriggerName());
+		AvailableTriggerObject trigObj=new AvailableTriggerObject();
+		trigObj.setId(currentTrigger.getId());
+		trigObj.setName(currentTrigger.getTriggerName());
+		responseObject.setTriggerName(trigObj);
 		responseObject.setId(currentZap.getId());
 		
 		
-		List<String> actionNames=new ArrayList<>();
+		List<AvailableActionObject> actionNames=new ArrayList<>();
 		for(Action action:currentActions) {
-			actionNames.add(action.getActionName());
+			AvailableActionObject actObj=new AvailableActionObject();
+			actObj.setId(action.getId());
+			actObj.setName(action.getActionName());
+			actionNames.add(actObj);
 		}
 		responseObject.setActionNames(actionNames);
+		
 		
 		return ResponseEntity.status(HttpStatus.SC_OK).body(responseObject);
 		
