@@ -4,6 +4,7 @@ import java.util.UUID;
 
 public class AvailableTriggerObject {
 	private UUID id;
+	private String image;
 	public AvailableTriggerObject() {
 		super();
 	}
@@ -11,6 +12,12 @@ public class AvailableTriggerObject {
 		super();
 		this.id = id;
 		this.name = name;
+	}
+	public String getImage() {
+		return image;
+	}
+	public void setImage(String image) {
+		this.image = image;
 	}
 	public UUID getId() {
 		return id;

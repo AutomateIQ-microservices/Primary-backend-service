@@ -22,8 +22,14 @@ public class AvailableActions {
 	@OneToMany(mappedBy = "actionId")
 	private List<Action> actions;
 	
+	private String image;
 	
-	
+	public String getImage() {
+		return image;
+	}
+	public void setImage(String image) {
+		this.image = image;
+	}
 	public AvailableActions() {
 		super();
 	}
